@@ -1,5 +1,3 @@
-package t411np2;
-
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;

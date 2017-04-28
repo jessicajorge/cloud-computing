@@ -29,6 +29,7 @@ public class InstanceManager {
 	protected InstanceManager() {
 		AWSCredentials credentials = new ProfileCredentialsProvider("default").getCredentials();
 		ec2 = new AmazonEC2Client(credentials);
+		ec2.setEndpoint("ec2.us-west-2.amazonaws.com");
 	}
 
 	public static InstanceManager manager() {
@@ -58,7 +59,6 @@ public class InstanceManager {
 	}
 
 	public String createInstance(String imageId) {
-		ec2.setEndpoint("ec2.us-west-2.amazonaws.com");
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 		/*
 		runInstancesRequest.withImageId("ami-8ca83fec").withInstanceType("t2.micro").withMinCount(1).withMaxCount(1)

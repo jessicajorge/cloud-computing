@@ -1,37 +1,38 @@
 package br.unifor.cloud;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 public class App {
-	
+
 	private JFrame frame;
 	private JFrame listFrame;
-	private JList<InstanceData> list;
+	private static JList<InstanceData> list;
 
 	private static InstanceManager manager;
 
 	public static void main(String[] args) {
 		App app = new App();
-		manager = InstanceManager.manager();
-		app.desenhar();
+		app.init();
+		new Thread(new ListRefresher(list, manager)).run();
 	}
 
-	public void desenhar() {
+	public void init() {
+		manager = InstanceManager.manager();
 		frame = new JFrame("Instances");
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -39,9 +40,12 @@ public class App {
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		list.setLayoutOrientation(JList.VERTICAL);
 		list.setVisibleRowCount(-1);
+		list.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+		
 		updateList();
+		
 		JScrollPane listScroller = new JScrollPane(list);
-		listScroller.setPreferredSize(new Dimension(300, 280));
+		listScroller.setPreferredSize(new Dimension(460, 240));
 		panel.add(listScroller);
 		JPanel panelButtons = new JPanel(new GridLayout(2, 2));
 		JButton buttonNew = new JButton("Create");
@@ -55,41 +59,54 @@ public class App {
 		JButton buttonStart = new JButton("Start");
 		buttonStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println();
+				InstanceData selected = list.getSelectedValue();
+				if (selected != null) {
+					String imageId = selected.getId();
+					manager.startInstance(imageId);
+					System.out.println("Start");
+				}
 			}
 		});
 		panelButtons.add(buttonStart);
 		JButton buttonStop = new JButton("Stop");
 		buttonStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println();
+				InstanceData selected = list.getSelectedValue();
+				if (selected != null) {
+					String imageId = selected.getId();
+					manager.stopInstance(imageId);
+					System.out.println("Stop");
+				}
 			}
 		});
 		panelButtons.add(buttonStop);
 		JButton buttonTerminate = new JButton("Terminate");
 		buttonTerminate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println();
+				InstanceData selected = list.getSelectedValue();
+				if (selected != null) {
+					String imageId = selected.getId();
+					manager.terminateInstance(imageId);
+					System.out.println("Terminate");
+				}
 			}
 		});
 		panelButtons.add(buttonTerminate);
 		panel.add(panelButtons);
 		createInstanceFrame();
 		frame.add(panel);
-		frame.setLocation(300, 300);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
-	
+
 	public void showImageList() {
 		listFrame.setLocationRelativeTo(frame);
 		listFrame.setVisible(true);
 	}
-	
+
 	public void createInstanceFrame() {
 		listFrame = new JFrame("Select image");
 		JPanel listPanel = new JPanel();
@@ -97,45 +114,45 @@ public class App {
 		JButton image1 = new JButton("Amazon Linux");
 		image1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println(InstanceManager.AMAZON_LINUX);
+				System.out.println(manager.createInstance(InstanceManager.AMAZON_LINUX));
 				listFrame.setVisible(false);
+				updateList();
 				frame.setEnabled(true);
 			}
 		});
 		JButton image2 = new JButton("Redhat Linux");
 		image2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println(InstanceManager.REDHAT_LINUX);
+				System.out.println(manager.createInstance(InstanceManager.REDHAT_LINUX));
 				listFrame.setVisible(false);
+				updateList();
 				frame.setEnabled(true);
 			}
 		});
 		JButton image3 = new JButton("SUSE Linux");
 		image3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println(InstanceManager.SUSE_LINUX);
+				System.out.println(manager.createInstance(InstanceManager.SUSE_LINUX));
 				listFrame.setVisible(false);
+				updateList();
 				frame.setEnabled(true);
 			}
 		});
 		JButton image4 = new JButton("Ubuntu Server");
 		image4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println(InstanceManager.UBUNTU_SERVER);
+				System.out.println(manager.createInstance(InstanceManager.UBUNTU_SERVER));
 				listFrame.setVisible(false);
+				updateList();
 				frame.setEnabled(true);
 			}
 		});
 		JButton image5 = new JButton("Windows Server");
 		image5.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO
-				System.out.println(InstanceManager.WINDOWS_SERVER);
+				System.out.println(manager.createInstance(InstanceManager.WINDOWS_SERVER));
 				listFrame.setVisible(false);
+				updateList();
 				frame.setEnabled(true);
 			}
 		});
@@ -149,12 +166,17 @@ public class App {
 		listFrame.pack();
 		listFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-	
+
 	public void updateList() {
+		int index = list.getSelectedIndex();
 		DefaultListModel<InstanceData> model = new DefaultListModel<InstanceData>();
-		for (InstanceData data : InstanceData.fromInstances(manager.getInstances())) {
+		List<InstanceData> instanceList = InstanceData.fromInstances(manager.getInstances());
+		for (InstanceData data : instanceList) {
 			model.addElement(data);
 		}
 		list.setModel(model);
+		list.setSelectedIndex(index);
+		list.repaint();
 	}
+
 }

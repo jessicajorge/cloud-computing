@@ -45,7 +45,7 @@ public class InstanceData {
 
 	@Override
 	public String toString() {
-		return "ID: " + id + "	| Status: " + status;
+		return "ID: " + id + "  	  | Status: " + status;
 	}
 
 }

@@ -45,7 +45,7 @@ public class App {
 		updateList();
 		
 		JScrollPane listScroller = new JScrollPane(list);
-		listScroller.setPreferredSize(new Dimension(460, 240));
+		listScroller.setPreferredSize(new Dimension(480, 240));
 		panel.add(listScroller);
 		JPanel panelButtons = new JPanel(new GridLayout(2, 2));
 		JButton buttonNew = new JButton("Create");
@@ -61,9 +61,9 @@ public class App {
 			public void actionPerformed(ActionEvent e) {
 				InstanceData selected = list.getSelectedValue();
 				if (selected != null) {
-					String imageId = selected.getId();
-					manager.startInstance(imageId);
-					System.out.println("Start");
+					String instanceId = selected.getId();
+					manager.startInstance(instanceId);
+					System.out.println("Starting");
 				}
 			}
 		});
@@ -73,9 +73,9 @@ public class App {
 			public void actionPerformed(ActionEvent e) {
 				InstanceData selected = list.getSelectedValue();
 				if (selected != null) {
-					String imageId = selected.getId();
-					manager.stopInstance(imageId);
-					System.out.println("Stop");
+					String instanceId = selected.getId();
+					manager.stopInstance(instanceId);
+					System.out.println("Stopping");
 				}
 			}
 		});
@@ -85,9 +85,9 @@ public class App {
 			public void actionPerformed(ActionEvent e) {
 				InstanceData selected = list.getSelectedValue();
 				if (selected != null) {
-					String imageId = selected.getId();
-					manager.terminateInstance(imageId);
-					System.out.println("Terminate");
+					String instanceId = selected.getId();
+					manager.terminateInstance(instanceId);
+					System.out.println("Terminating");
 				}
 			}
 		});
